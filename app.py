@@ -116,8 +116,9 @@ def render_interpretation(dream_interpretation: str) -> None:
     """
     Render the dream interpretation inside a styled box.
     """
+    formatted = dream_interpretation.replace("\n", "<br>")
     st.markdown(
-        f'<div class="interpretation-box">{dream_interpretation}</div>',
+        f'<div class="interpretation-box">{formatted}</div>',
         unsafe_allow_html=True,
     )
 
@@ -214,8 +215,10 @@ def main() -> None:
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🔮 Interpret my dream", type="primary"):
-            render_dream_result(dream_input)
+        interpret_button = st.button("🔮 Interpret my dream", type="primary")
+
+    if interpret_button:
+        render_dream_result(dream_input)
 
     st.divider()
     render_journal_toggle()

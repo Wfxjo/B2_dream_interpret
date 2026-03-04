@@ -64,6 +64,12 @@ CUSTOM_CSS = """
         margin: 16px 0;
         color: #e0d7f5;
         line-height: 1.8;
+        width: 100%;
+        min-height: 200px;
+        overflow-y: auto;
+        max-height: 500px;
+}
+}
     }
     .stExpander {
         background-color: #1a1a2e !important;
