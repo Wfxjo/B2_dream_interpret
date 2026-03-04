@@ -10,14 +10,7 @@ from dream_interpret import (
     add_dream_to_journal,
     load_journal,
 )
-
 from CSSapp_UI import CUSTOM_CSS, STARS_HTML
-
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-
-
 
 
 # ---------------------------------------------------------------------------
@@ -129,10 +122,10 @@ def render_interpretation(dream_interpretation: str) -> None:
     )
 
 
-def render_image(dream_interpretation: str) -> None:
+def render_image(dream_interpretation: str) -> bytes | None:
     """
     Extract the visual prompt, generate and display the dream image.
-    Shows a warning if generation fails.
+    Returns the image bytes if successful, None otherwise.
     """
     with st.spinner("🎨 Generating dream vision..."):
         image_prompt = extract_image_prompt(dream_interpretation)
@@ -141,13 +134,14 @@ def render_image(dream_interpretation: str) -> None:
         st.image(image_bytes, caption="✦ Your dream vision ✦", use_container_width=True)
     else:
         st.warning("Image could not be generated, please try again.")
+    return image_bytes
 
 
 def render_journal() -> None:
     """
     Load and display all journal entries in reverse chronological order.
     Each entry is shown as a collapsible expander with the date as title,
-    revealing the dream text and its interpretation when clicked.
+    revealing the dream text, its interpretation and image when clicked.
     """
     journal = load_journal()
     if not journal:
@@ -160,6 +154,9 @@ def render_journal() -> None:
             st.write(entry["dream"])
             st.markdown("**🔮 Interpretation**")
             st.write(entry["interpretation"])
+            if entry.get("image"):
+                image_data = base64.b64decode(entry["image"])
+                st.image(image_data, use_container_width=True)
 
 
 def render_journal_toggle() -> None:
@@ -179,6 +176,22 @@ def render_journal_toggle() -> None:
     if st.session_state["show_journal"]:
         st.subheader("📖 Dream Journal")
         render_journal()
+
+
+def render_dream_result(dream_input: str) -> None:
+    """
+    Handle the full dream processing flow :
+    interpretation, image generation and journal save.
+    """
+    if dream_input.strip():
+        with st.spinner("✨ Interpreting your dream..."):
+            dream_interpretation = interpret_dream(dream_input)
+        render_interpretation(dream_interpretation)
+        image_bytes = render_image(dream_interpretation)
+        add_dream_to_journal(dream_input, dream_interpretation, image_bytes)
+        st.success("✦ Dream saved to your journal ✦")
+    else:
+        st.warning("Please describe your dream first.")
 
 
 # ---------------------------------------------------------------------------
@@ -201,26 +214,8 @@ def main() -> None:
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        interpret_button = st.button("🔮 Interpret my dream", type="primary")
-
-    if interpret_button:
-        if dream_input.strip():
-
-            # Step 1 : interpret the dream via Groq API
-            with st.spinner("✨ Interpreting your dream..."):
-                dream_interpretation = interpret_dream(dream_input)
-
-            render_interpretation(dream_interpretation)
-
-            # Step 2 : generate an image from the visual scene description
-            render_image(dream_interpretation)
-
-            # Step 3 : save the dream and interpretation to the journal
-            add_dream_to_journal(dream_input, dream_interpretation)
-            st.success("✦ Dream saved to your journal ✦")
-
-        else:
-            st.warning("Please describe your dream first.")
+        if st.button("🔮 Interpret my dream", type="primary"):
+            render_dream_result(dream_input)
 
     st.divider()
     render_journal_toggle()

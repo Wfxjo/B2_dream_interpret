@@ -56,17 +56,22 @@ def save_journal(journal: list) -> None:
         json.dump(journal, journal_file, indent=2)
 
 
-def add_dream_to_journal(dream_text: str, interpretation: str) -> None:
+def add_dream_to_journal(dream_text: str, interpretation: str, image_bytes: bytes | None = None) -> None:
     """
     Create a new journal entry with the current date, the dream text,
-    and its interpretation, then append it to the journal and save it.
+    its interpretation, and optionally an image encoded in base64,
+    then append it to the journal and save it.
     """
+    import base64
+
     journal = load_journal()
-    journal.append({
+    entry = {
         "date":           datetime.now().strftime("%Y-%m-%d %H:%M"),
         "dream":          dream_text,
         "interpretation": interpretation,
-    })
+        "image":          base64.b64encode(image_bytes).decode("utf-8") if image_bytes else None,
+    }
+    journal.append(entry)
     save_journal(journal)
 
 
