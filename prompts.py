@@ -14,4 +14,5 @@ faithful to ALL details mentioned in the dream including clothing and objects.
 
 Avoid medical or psychological diagnosis.
 Use clear, poetic and flowing language. No bullet points, no bold headers, no markdown symbols.
+Always respond in the same language as the user's dream description.
 """
